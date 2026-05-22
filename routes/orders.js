@@ -87,13 +87,16 @@ router.get('/admin/stats', verifyToken, async (req, res) => {
       `),
       db.query(`
         SELECT 
-          product_name,
-          SUM(quantity)::int as total_quantity,
-          SUM(price * quantity)::float as total_revenue
+          COALESCE(p.name_ar, order_items.product_name) as product_name,
+          COALESCE(p.name_ar, order_items.product_name) as product_name_ar,
+          COALESCE(NULLIF(p.name_tr, ''), p.name_ar, order_items.product_name) as product_name_tr,
+          SUM(order_items.quantity)::int as total_quantity,
+          SUM(order_items.price * order_items.quantity)::float as total_revenue
         FROM order_items
         JOIN orders ON order_items.order_id = orders.id
+        LEFT JOIN products p ON order_items.product_id = p.id
         WHERE orders.status != 'cancelled'
-        GROUP BY product_name
+        GROUP BY p.name_ar, p.name_tr, order_items.product_name
         ORDER BY total_quantity DESC
         LIMIT 10
       `)

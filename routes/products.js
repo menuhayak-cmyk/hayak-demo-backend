@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
 router.get('/admin/all', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.*, c.name_ar AS category_name FROM products p
+      `SELECT p.*, c.name_ar AS category_name, c.name_tr AS category_name_tr FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        ORDER BY p.sort_order ASC, p.id ASC`
     );
